@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+import rospy
+from race.msg import drive_values
+from race.msg import angle_param
+from race.msg import velocity_param
+from std_msgs.msg import Bool
+import numpy as np
+
+angle = 0
+velocity = 0
+msg = drive_values()
+pub = rospy.Publisher('drive_pwm', drive_values, queue_size=10)
+em_pub = rospy.Publisher('eStop', Bool, queue_size=10)
+
+# function to map from one range to another, similar to arduino
+def arduino_map(x, in_min, in_max, out_min, out_max):
+	return (x - in_min) * (out_max - out_min) // (in_max - in_min) + out_min
+
+# callback function on occurance of drive parameters(angle & velocity)
+def velCallback(data):
+	global velocity
+	velocity = data.velocity
+	# Do the computation
+	pwm1 = arduino_map(velocity,-100,100,6554,13108);
+	msg.pwm_drive = pwm1
+
+
+def angleCallback(data):
+	global angle
+	angle = data.angle
+	# Do the computation
+	pwm2 = arduino_map(angle,-100,100,6554,13108);
+	msg.pwm_angle = pwm2
+
+def talker():
+	rospy.init_node('serial_talker', anonymous=True)
+	em_pub.publish(False)
+	rospy.Subscriber("velocity_parameters", velocity_param, velCallback)
+	rospy.Subscriber("angle_parameters", angle_param, angleCallback)
+	
+	print("Velocity: ",velocity,"Angle: ",angle)
+	pub.publish(msg)
+
+	rospy.spin()
+
+if __name__ == '__main__':
+	print("Serial talker initialized")
+	talker()

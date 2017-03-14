@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<launch>
+   
+	<node pkg="tf" type="static_transform_publisher" name="base_frame_to_laser" args="0.0 0.0 0.0 0.0 0.0 0.0 /base_link /laser 50" />
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find race)/map/test.yaml"/> 
+	
+	<!--<node pkg="rosbag" type="play" name="player" output="screen" args="-clock /home/xlab_ws/src/xlab_race/bags/1970-01-01-00-33-02.bag"/>-->
+
+	<node pkg="laser_scan_matcher" name="laser_scan_matcher_node" type="laser_scan_matcher_node" output="screen">
+		<param name="fixed_frame" value="odom"/>
+	</node>
+
+	<!--node pkg="race" type="getOdomFromMatcher" name="getOdomFromMatcher"/>-->
+	<node pkg="race" type="odom_scan_matcher" name="odom_scan_matcher" output="screen"/>
+
+
+</launch>
