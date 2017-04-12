@@ -10,3 +10,4 @@ if __name__ == '__main__':
     rospy.Subscriber("scan",LaserScan,callback)
 
     rospy.spin()
+    
